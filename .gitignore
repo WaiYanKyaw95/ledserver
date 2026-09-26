@@ -1,0 +1,9 @@
+# binary
+ledserver
+ledserver.exe
+
+# sqlite
+sqlite3.exe
+
+# db
+*.db
