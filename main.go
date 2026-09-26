@@ -2,6 +2,7 @@ package main
 
 import (
 	"ledserver/handlers"
+	"ledserver/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,17 @@ func main() {
 	router.POST("/logout", func(c *gin.Context) {
 		handlers.Logout(c, db)
 	})
+
+	protected := router.Group("/")
+	protected.Use(middleware.AuthMiddleware(db))
+	{
+		protected.POST("/led/on", func(c *gin.Context) {
+			handlers.LedOn(c)
+		})
+		protected.POST("/led/off", func(c *gin.Context) {
+			handlers.LedOff(c)
+		})
+	}
 
 	router.Run(":8080")
 }
