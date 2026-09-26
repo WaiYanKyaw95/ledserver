@@ -25,5 +25,9 @@ func main() {
 		handlers.Login(c, db)
 	})
 
+	router.POST("/logout", func(c *gin.Context) {
+		handlers.Logout(c, db)
+	})
+
 	router.Run(":8080")
 }

@@ -15,7 +15,7 @@ import (
 type User struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
-	Password string `json:"password"`
+	Password string `json:"-"`
 }
 
 type LoginInput struct {
@@ -107,9 +107,31 @@ func Login(c *gin.Context, db *sql.DB) {
 }
 
 func Logout(c *gin.Context, db *sql.DB) {
+	var user User
 	// get the session token from the authorization header
+	bearer := c.GetHeader("Authorization")
+	token := strings.TrimPrefix(bearer, "Bearer ")
+
 	// check if the token is in the table
+	row := db.QueryRow("SELECT user_id FROM sessions WHERE token = ?", token)
 	// if not -> 401
+	err := row.Scan(&user.ID)
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "no valid token"})
+		return
+		// if nil, database error 500
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error"})
+		return
+	}
+
 	// delete the session token
+	_, err = db.Exec("DELETE FROM sessions WHERE token = ?", token)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error"})
+		return
+	}
+
 	// response 200
+	c.JSON(http.StatusOK, gin.H{"success": "log out"})
 }
