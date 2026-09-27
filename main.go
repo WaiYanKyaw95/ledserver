@@ -3,8 +3,6 @@ package main
 import (
 	"ledserver/handlers"
 	"ledserver/middleware"
-	"ledserver/serial"
-	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -19,16 +17,10 @@ func main() {
 
 	portName := os.Getenv("SERIAL_PORT")
 	if portName == "" {
-		// default for pi
+		// default to /dev/arduino
 		// during development in Windows, set export SERIAL_PORT=COM7 before go run .
-		portName = "/dev/ttyACM0"
+		portName = "/dev/arduino"
 	}
-
-	port, err := serial.OpenPort(9600, portName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer port.Close()
 
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "ledserver is running"})
@@ -50,10 +42,10 @@ func main() {
 	protected.Use(middleware.AuthMiddleware(db))
 	{
 		protected.POST("/led/on", func(c *gin.Context) {
-			handlers.LedOn(c, port)
+			handlers.LedOn(c, portName)
 		})
 		protected.POST("/led/off", func(c *gin.Context) {
-			handlers.LedOff(c, port)
+			handlers.LedOff(c, portName)
 		})
 	}
 
