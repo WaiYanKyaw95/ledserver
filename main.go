@@ -3,6 +3,8 @@ package main
 import (
 	"ledserver/handlers"
 	"ledserver/middleware"
+	"ledserver/serial"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +15,12 @@ func main() {
 
 	db := initDB()
 	defer db.Close()
+
+	port, err := serial.OpenPort(9600, "COM7")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer port.Close()
 
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "ledserver is running"})
@@ -34,10 +42,10 @@ func main() {
 	protected.Use(middleware.AuthMiddleware(db))
 	{
 		protected.POST("/led/on", func(c *gin.Context) {
-			handlers.LedOn(c)
+			handlers.LedOn(c, port)
 		})
 		protected.POST("/led/off", func(c *gin.Context) {
-			handlers.LedOff(c)
+			handlers.LedOff(c, port)
 		})
 	}
 
