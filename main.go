@@ -5,6 +5,7 @@ import (
 	"ledserver/middleware"
 	"ledserver/serial"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +17,14 @@ func main() {
 	db := initDB()
 	defer db.Close()
 
-	port, err := serial.OpenPort(9600, "COM7")
+	portName := os.Getenv("SERIAL_PORT")
+	if portName == "" {
+		// default for pi
+		// during development in Windows, set export SERIAL_PORT=COM7 before go run .
+		portName = "/dev/ttyACM0"
+	}
+
+	port, err := serial.OpenPort(9600, portName)
 	if err != nil {
 		log.Fatal(err)
 	}

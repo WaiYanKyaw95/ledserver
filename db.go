@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"log"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func initDB() *sql.DB {
 	// create and connect to a database
-	db, err := sql.Open("sqlite3", "ledserver.db")
+	db, err := sql.Open("sqlite", "ledserver.db")
 	if err != nil {
 		log.Fatal(err)
 	}
