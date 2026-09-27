@@ -22,9 +22,7 @@ func main() {
 		portName = "/dev/arduino"
 	}
 
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "ledserver is running"})
-	})
+	router.StaticFile("/", "./static/index.html")
 
 	router.POST("/register", func(c *gin.Context) {
 		handlers.Register(c, db)

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED Server</title>
+</head>
+<body>
+    <div id="login-section">
+        <form id="login-form">
+            <input type="text" placeholder="username" id="username">
+            <input type="password" placeholder="password" id="password">
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <div id="led-section" style="display:none">
+        <h1>Welcome to the LED server...</h1>
+        <button type="button" id="led-on">ON</button>
+        <button type="button" id="led-off">OFF</button>
+        <button type="button" id="logout">Logout</button>
+    </div>
+    <script>
+        let token = null
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault()  // stop the page from reloading
+
+            const username = document.getElementById('username').value
+            const password = document.getElementById('password').value
+
+            fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, password: password })
+            })
+            .then(function(response) {
+                return response.json()
+            })
+            .then(function(data) {
+                if (data.token) {
+                    token = data.token
+                    // hide login section
+                    document.getElementById('login-section').style.display = 'none'
+                    // show LED section
+                    document.getElementById('led-section').style.display = 'block'
+                } else {
+                    alert('Invalid credentials')
+                }
+            })
+        })
+
+        document.getElementById('led-on').addEventListener('click', function() {
+            fetch('/led/on', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+        })
+
+        document.getElementById('led-off').addEventListener('click', function() {
+            fetch('/led/off', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+        })
+
+        document.getElementById('logout').addEventListener('click', function() {
+            fetch('/logout', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(function() {
+                token = null
+                document.getElementById('username').value = ''
+                document.getElementById('password').value = ''
+                document.getElementById('led-section').style.display = 'none'
+                document.getElementById('login-section').style.display = 'block'
+            })
+        })
+    </script>
+</body>
+</html>
